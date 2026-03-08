@@ -1,0 +1,35 @@
+# CipherX Backend Requirements
+
+# Core Framework
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0
+
+# AI & Language Processing
+nltk>=3.8.0  # Natural Language Toolkit (236,000+ English words + Hindi support)
+
+# Optional Cryptography Libraries
+# Install with: pip install -r requirements.txt
+
+# For modern encryption (AES, DES, 3DES, Blowfish)
+pycryptodome>=3.19.0
+
+# For Base58 encoding (Bitcoin-style)
+base58>=2.1.0
+
+# Additional hashing (already in Python stdlib but listing for reference)
+# hashlib - Built-in (MD5, SHA1, SHA256, SHA512, SHA3, BLAKE2)
+
+# Performance optimization
+# cython>=3.0.0  # Optional: For faster execution
+
+# Development dependencies
+# pytest>=7.0.0
+# requests>=2.31.0  # For testing
+
+# Note: Many operations work with Python's standard library only.
+# The optional dependencies enhance functionality:
+# - nltk: Enables comprehensive English/Hindi word detection (highly recommended!)
+# - pycryptodome: Enables AES, DES, 3DES, Blowfish encryption
+# - base58: Enables Base58 encoding/decoding
+# - Without these, the app still works but returns error messages for unavailable operations

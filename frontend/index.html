@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherX Pro - AI-Powered Universal Decoder & CTF Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/style.css?v=4.1.5">
+    <style>
+        /* Emergency fallback styles for buttons - Theme Aware */
+        .tab-container {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+            background: var(--ops-bg) !important;
+            padding: 8px !important;
+            border-radius: 12px !important;
+            margin-bottom: 25px !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .tab-btn {
+            width: 100% !important;
+            padding: 12px 15px !important;
+            border: none !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+            background: rgba(128, 128, 128, 0.1) !important;
+            color: var(--text-color) !important;
+            text-align: left !important;
+            font-size: 0.9em !important;
+            transition: all 0.2s !important;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            opacity: 1 !important;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(128, 128, 128, 0.2) !important;
+            opacity: 1 !important;
+        }
+    </style>
+</head>
+
+<body class="light-mode">
+    <!-- Header -->
+    <div class="header">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode (Alt+T)" id="theme-toggle">
+            <span id="theme-icon">🌙</span>
+        </button>
+        <h1>🔐 CipherX Pro <span style="font-size: 0.4em; vertical-align: middle; opacity: 0.7;">v4.1.5</span></h1>
+        <p class="subtitle">AI-Powered Universal Decoder - For CTF & Cybersecurity Professionals</p>
+        <div class="keyboard-shortcut-info">💡 Press <kbd>Ctrl+K</kbd> to search operations | <kbd>Ctrl+S</kbd> to save
+            | <kbd>Ctrl+D</kbd> to decode</div>
+    </div>
+
+    <div class="container">
+        <!-- Operations Panel -->
+        <div class="operations-panel">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" id="operationSearch" placeholder="🔍 Search operations... (Ctrl+K)"
+                    onkeyup="filterOperations()" title="Search operations by name or description">
+                <button onclick="document.getElementById('operationSearch').value = ''; filterOperations();"
+                    title="Clear search">✕</button>
+            </div>
+
+            <!-- Recipe Builder Tab -->
+            <div class="tab-container">
+                <button class="tab-btn active" onclick="switchTab('operations')"><i class="fas fa-tools"></i>
+                    Operations</button>
+                <button class="tab-btn" onclick="switchTab('recipe')"><i class="fas fa-mortar-pestle"></i> Recipe (<span
+                        id="recipeCount">0</span>)</button>
+                <button class="tab-btn" onclick="switchTab('batch')"><i class="fas fa-boxes"></i> Batch</button>
+                <button class="tab-btn" onclick="switchTab('history')"><i class="fas fa-history"></i> History</button>
+            </div>
+
+            <!-- Tab: Operations -->
+            <div id="tab-operations" class="tab-content active">
+                <!-- Favorites Section -->
+                <div class="favorites-section">
+                    <h3>⭐ Favorites <button class="btn-sm" onclick="clearFavorites()"
+                            title="Clear all favorites">Clear</button></h3>
+                    <div id="favoritesList" class="operations-list"></div>
+                </div>
+
+                <!-- Auto Decode -->
+                <h3>🤖 AI Auto Decode</h3>
+                <button class="auto-btn" onclick="autoDecode()"
+                    data-tooltip="🤖 AI Intelligence: Automatically analyzes, detects, and decodes multiple layers of hidden data using entropy and pattern recognition.">🚀
+                    Auto Decode (Ctrl+D)</button>
+                <div
+                    style="display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 0.85em; opacity: 0.8; background: var(--card-bg); padding: 8px; border-radius: 6px;">
+                    <input type="checkbox" id="deepAnalysis" style="width: 16px; height: 16px; cursor: pointer;">
+                    <label for="deepAnalysis" style="cursor: pointer;">Recursive Deep Analysis (Multi-layer)</label>
+                </div>
+
+            </div>
+
+            <!-- Tab: Recipe Builder -->
+            <div id="tab-recipe" class="tab-content">
+                <h3>🍳 Recipe Builder <span id="recipeCount" class="badge">0</span> <button class="btn-sm"
+                        onclick="clearRecipe()">Clear</button></h3>
+                <p class="help-text">Build a chain of operations to process text sequentially</p>
+                <div id="recipeSteps" class="recipe-steps"></div>
+                <button class="btn-primary" onclick="executeRecipe()">▶️ Execute Recipe</button>
+                <button class="btn-secondary" onclick="saveRecipe()">💾 Save Recipe</button>
+                <button class="btn-secondary" onclick="loadRecipe()">📂 Load Recipe</button>
+            </div>
+
+            <!-- Tab: Batch Processing -->
+            <div id="tab-batch" class="tab-content">
+                <h3>📦 Batch Processing</h3>
+                <p class="help-text">Process multiple inputs with the same operation</p>
+                <select id="batchOperation" class="batch-select">
+                    <option value="to_base64">Base64 Encode</option>
+                    <option value="from_base64">Base64 Decode</option>
+                    <option value="md5">MD5 Hash</option>
+                    <option value="sha256">SHA256 Hash</option>
+                    <option value="to_hex">Hex Encode</option>
+                    <option value="from_hex">Hex Decode</option>
+                </select>
+                <textarea id="batchInput" placeholder="Enter one input per line..." rows="8"></textarea>
+                <button class="btn-primary" onclick="executeBatch()">▶️ Process Batch</button>
+                <button class="btn-secondary" onclick="downloadBatchResults()">💾 Export Results</button>
+            </div>
+
+            <!-- Tab: History -->
+            <div id="tab-history" class="tab-content">
+                <h3>📜 Operation History <button class="btn-sm" onclick="clearHistory()">Clear</button></h3>
+                <div id="historyList" class="history-list"></div>
+            </div>
+
+            <div class="all-operations-categories">
+                <!-- 🔐 Hashing -->
+                <h3 class="category-header">🔐 Hashing <button class="btn-sm" onclick="showHashAll()"
+                        title="Calculate all hashes (MD5, SHA1, SHA256, etc.) simultaneously.">All</button></h3>
+                <div class="operations-list">
+                    <button class="op-btn" onclick="hashOperation('md5')"
+                        data-tooltip="MD5: Fast but insecure 128-bit hash.">MD5</button>
+                    <button class="op-btn" onclick="hashOperation('sha1')"
+                        data-tooltip="SHA-1: Older 160-bit standard.">SHA-1</button>
+                    <button class="op-btn" onclick="hashOperation('sha256')"
+                        data-tooltip="SHA-256: Industry standard secure 256-bit hash.">SHA-256</button>
+                    <button class="op-btn" onclick="hashOperation('sha512')"
+                        data-tooltip="SHA-512: High-security 512-bit hash.">SHA-512</button>
+                    <button class="op-btn" onclick="hashOperation('sha3-256')"
+                        title="SHA3-256 Cryptographic Hash algorithm">SHA3-256</button>
+                    <button class="op-btn" onclick="hashOperation('sha3-512')"
+                        title="SHA3-512 Cryptographic Hash algorithm">SHA3-512</button>
+                    <button class="op-btn" onclick="hashOperation('blake2b')"
+                        data-tooltip="BLAKE2b: High performance secure hashing.">BLAKE2b</button>
+                    <button class="op-btn" onclick="hashOperation('blake2s')"
+                        data-tooltip="BLAKE2s: Optimized for 32-bit platforms.">BLAKE2s</button>
+                </div>
+
+                <!-- 🛸 Classical Ciphers -->
+                <h3 class="category-header">🛸 Classical Ciphers</h3>
+                <div class="operations-list">
+                    <button class="op-btn" onclick="manualOperation('caesar')"
+                        data-tooltip="Caesar Cipher: Bruteforce mode - Tries all 25 shifts to find the hidden message.">Caesar</button>
+                    <button class="op-btn" onclick="manualOperation('rot13')"
+                        data-tooltip="ROT13: Standard 13-place alphabet rotation.">ROT13</button>
+                    <button class="op-btn" onclick="manualOperation('atbash')"
+                        data-tooltip="Atbash: Mirrors the alphabet (A ↔ Z, B ↔ Y).">Atbash</button>
+                    <button class="op-btn" onclick="manualOperation('vigenere')"
+                        data-tooltip="Vigenère Cipher: Polyalphabetic substitution using a keyword.">Vigenère</button>
+                    <button class="op-btn" onclick="manualOperation('morse')"
+                        data-tooltip="Morse Code: Converts . and - notation to uppercase text.">Morse</button>
+                    <button class="op-btn" onclick="manualOperation('railfence')"
+                        data-tooltip="Rail Fence: A transposition cipher that writes text in a zigzag pattern.">Rail
+                        Fence</button>
+                    <button class="op-btn" onclick="manualOperation('affine')"
+                        data-tooltip="Affine Cipher: A monoalphabetic substitution cipher where each letter is mapped to its numeric equivalent.">Affine</button>
+                    <button class="op-btn" onclick="manualOperation('reverse')"
+                        data-tooltip="Reverse: Reverses the entire string order.">Reverse</button>
+                </div>
+
+                <!-- 🔒 Advanced Encoding System -->
+                <h3 class="category-header">🔒 Advanced Encoding System</h3>
+                <div class="operations-list">
+                    <button class="op-btn" onclick="encodeOperation('base64')"
+                        data-tooltip="Base64 Encode: Standard web bytes-to-text conversion.">Base64</button>
+                    <button class="op-btn" onclick="encodeOperation('base32')"
+                        data-tooltip="Base32 Encode: Case-insensitive alphanumeric encoding.">Base32</button>
+                    <button class="op-btn" onclick="encodeOperation('base58')"
+                        data-tooltip="Base58 Encode: Bitcoin-style human-readable encoding.">Base58</button>
+                    <button class="op-btn" onclick="encodeOperation('base85')"
+                        data-tooltip="Base85 Encode: Highly efficient binary-to-ascii (ASCII85).">Base85</button>
+                    <button class="op-btn" onclick="encodeOperation('hex')"
+                        data-tooltip="Hex Encode: Binary bytes to hexadecimal string.">Hexadecimal</button>
+                    <button class="op-btn" onclick="encodeOperation('binary')"
+                        data-tooltip="Binary Encode: Text to 8-bit binary 0/1 blocks.">Binary</button>
+                    <button class="op-btn" onclick="encodeOperation('url')"
+                        data-tooltip="URL Encode: Percent-encoding for safe transmission in URIs.">URL Encode</button>
+                    <button class="op-btn" onclick="encodeOperation('html')"
+                        data-tooltip="HTML Entity Encode: Escape special characters for web safety.">HTML
+                        Entity</button>
+                </div>
+
+                <h3 class="category-header">🛡️ Modern Crypto & Compression</h3>
+                <div class="operations-list">
+                    <button class="op-btn" onclick="encodeOperation('aes')"
+                        data-tooltip="AES-256 (CBC): Secure encryption using a secret key.">AES Encrypt</button>
+                    <button class="op-btn" onclick="encodeOperation('gzip')"
+                        data-tooltip="Gzip Compress: Standard DEFLATE compression (outputs Base64).">Gzip</button>
+                    <button class="op-btn" onclick="encodeOperation('zlib')"
+                        data-tooltip="Zlib Compress: Higher performance compression (outputs Base64).">Zlib</button>
+                    <button class="op-btn" onclick="encodeOperation('double64')"
+                        data-tooltip="Double Base64: Layered obfuscation technique.">Double B64</button>
+                </div>
+
+                <h3 class="category-header">🧵 String Transformations</h3>
+                <div class="operations-list">
+                    <button class="op-btn" onclick="encodeOperation('upper')"
+                        data-tooltip="To Upper: Convert all text to UPPERCASE.">To Upper</button>
+                    <button class="op-btn" onclick="encodeOperation('lower')"
+                        data-tooltip="To Lower: Convert all text to lowercase.">To Lower</button>
+                    <button class="op-btn" onclick="encodeOperation('nowhitespace')"
+                        data-tooltip="No Whitespace: Removes all spaces, tabs, and newlines.">Remove Spaces</button>
+                    <button class="op-btn" onclick="encodeOperation('ascii')"
+                        data-tooltip="To ASCII: Converts characters to decimal numbers.">To ASCII</button>
+                    <button class="op-btn" onclick="encodeOperation('utf8')"
+                        data-tooltip="To UTF-8: Converts text to hex byte representation.">To Hex Bytes</button>
+                    <button class="op-btn" onclick="encodeOperation('unicode')"
+                        data-tooltip="To Unicode: Converts text to \\uXXXX escape format.">To Unicode</button>
+                </div>
+
+                <!-- 📋 Basic Decoding -->
+                <h3 class="category-header">📋 Basic Decoding</h3>
+                <div class="operations-list">
+                    <button class="op-btn" onclick="manualOperation('base64')"
+                        data-tooltip="Base64 Decode: Common web and data encoding.">Base64</button>
+                    <button class="op-btn" onclick="manualOperation('base32')"
+                        data-tooltip="Base32 Decode: URL-safe encoding used in TOTPs.">Base32</button>
+                    <button class="op-btn" onclick="manualOperation('base58')"
+                        data-tooltip="Base58 Decode: Used in Bitcoin addresses to avoid look-alike characters.">Base58</button>
+                    <button class="op-btn" onclick="manualOperation('base85')"
+                        data-tooltip="Base85 Decode: Also known as Ascii85, used in PDF and PostScript.">Base85</button>
+                    <button class="op-btn" onclick="manualOperation('hex')"
+                        data-tooltip="Hex Decode: Converts hexadecimal (0-9, A-F) back to text.">Hexadecimal</button>
+                    <button class="op-btn" onclick="manualOperation('binary')"
+                        data-tooltip="Binary Decode: Converts 8-bit binary groups back to characters.">Binary</button>
+                    <button class="op-btn" onclick="manualOperation('url')"
+                        data-tooltip="URL Decode: Decodes percent-encoded character sequences.">URL</button>
+                    <button class="op-btn" onclick="manualOperation('jwt')"
+                        data-tooltip="JWT Reveal: Inspects headers and payloads from JSON Web Tokens.">JWT
+                        Reveal</button>
+                    <button class="op-btn" onclick="manualOperation('unicode')"
+                        data-tooltip="Unicode Decode: Converts UTF-8 escape sequences back to characters.">Unicode</button>
+                    <button class="op-btn" onclick="manualOperation('xor')"
+                        data-tooltip="XOR Logic: Simple bitwise decoder with a fixed key.">XOR Logic</button>
+                </div>
+
+                <!-- 🔎 Regex & Extraction -->
+                <h3 class="category-header">🔎 Extraction</h3>
+                <div class="operations-list">
+                    <button class="op-btn" onclick="extractOperation('emails')"
+                        data-tooltip="Extract all email addresses from the input text.">Extract Emails</button>
+                    <button class="op-btn" onclick="extractOperation('urls')"
+                        data-tooltip="Extract all URLs and links from the input text.">Extract URLs</button>
+                    <button class="op-btn" onclick="extractOperation('ipv4')"
+                        data-tooltip="Extract all IPv4 addresses.">Extract IPs</button>
+                    <button class="op-btn" onclick="extractOperation('md5')"
+                        data-tooltip="Extract all MD5 hash-looking strings (32 hex chars).">Extract MD5s</button>
+                    <button class="op-btn" onclick="extractOperation('sha256')"
+                        data-tooltip="Extract all SHA-256 hash-looking strings (64 hex chars).">Extract SHA256s</button>
+                    <button class="op-btn" onclick="extractOperation('base64')"
+                        data-tooltip="Extract potential Base64 encoded strings.">Extract Base64</button>
+                </div>
+            </div>
+
+            <!-- File Operations -->
+            <h3>📁 File Operations</h3>
+            <div class="file-ops-area">
+                <input type="file" id="fileInput" onchange="loadFile()" style="display:none">
+                <div class="file-buttons-container">
+                    <button class="file-btn load-btn" onclick="document.getElementById('fileInput').click()">
+                        <span class="icon">📂</span>
+                        <span class="text">Load File</span>
+                    </button>
+                    <button class="file-btn save-btn" onclick="downloadOutput()">
+                        <span class="icon">💾</span>
+                        <span class="text">Save Output (Ctrl+S)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Work Area -->
+        <div class="work-area">
+
+            <!-- Operation Parameters Section -->
+            <div class="params-section"
+                style="background: var(--card-bg); padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px var(--shadow-color); display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <h3 style="margin: 0; min-width: max-content;">⚙️ Operation Parameters</h3>
+
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <label for="paramKey" style="font-weight: bold; font-size: 0.9em;">Key / Secret
+                        (Vigenère/AES/XOR):</label>
+                    <input type="text" id="paramKey" placeholder="secret"
+                        style="padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(128,128,128,0.3); background: var(--bg-color); color: var(--text-color); width: 150px;">
+                </div>
+
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <label for="paramRails" style="font-weight: bold; font-size: 0.9em;">Rails / Shift (Rail
+                        Fence/Caesar):</label>
+                    <input type="number" id="paramRails" placeholder="3" min="2" max="10"
+                        style="padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(128,128,128,0.3); background: var(--bg-color); color: var(--text-color); width: 80px;">
+                </div>
+            </div>
+
+            <!-- Input/Output Section -->
+            <div class="io-section">
+                <div class="input-section">
+                    <h3>Input <button class="btn-sm" onclick="clearInput()">Clear</button></h3>
+                    <textarea id="inputText" placeholder="Paste encrypted text here..."></textarea>
+                    <div class="stats">
+                        <span id="inputStats">Length: 0</span>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <h3>Output <button class="btn-sm" onclick="copyOutput()">Copy</button></h3>
+                    <textarea id="outputText" placeholder="Results will appear here..." readonly></textarea>
+                    <div class="stats">
+                        <span id="outputStats">Length: 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel">
+                <h3>🎯 AI Detection Results (Top Matches)</h3>
+                <div id="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="author-section">
+            <h3>👤 Connect with Author</h3>
+            <p class="author-name">Kaif Tarasgar</p>
+            <div class="author-links">
+                <a href="https://www.linkedin.com/in/kaif-tarasgar-0b5425326/" target="_blank" class="author-card">
+                    <i class="fab fa-linkedin"></i>
+                    <span>LinkedIn</span>
+                </a>
+                <a href="https://github.com/Kaif-T-200" target="_blank" class="author-card">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+                <a href="https://x.com/Kaif_T_200" target="_blank" class="author-card">
+                    <i class="fab fa-twitter"></i>
+                    <span>Twitter/X</span>
+                </a>
+                <a href="https://kaif-t-200.github.io/Portfolio/" target="_blank" class="author-card">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Portfolio</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>Made with ❤️ by <strong>Kaif Tarasgar</strong> | CipherX Pro v4.0 - The Ultimate CTF & Security Tool</p>
+            <p style="margin-top: 8px; font-size: 0.85em;">
+                <a href="https://github.com/Kaif-T-200/CipherX" target="_blank">GitHub Repository</a> •
+                <a href="https://github.com/Kaif-T-200/CipherX/blob/main/LICENSE" target="_blank">License</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="/assets/script.js"></script>
+</body>
+
+</html>
