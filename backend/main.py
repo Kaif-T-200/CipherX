@@ -223,6 +223,163 @@ async def api_info():
         "all_operations": list(OPERATIONS.keys())
     }
 
+
+# Extraction operations to try during auto-decode when input is plain text
+_EXTRACTION_OPS = {
+    'extract_emails': ('Emails', '📧'),
+    'extract_urls': ('URLs', '🔗'),
+    'extract_ips': ('IP Addresses', '🌐'),
+    'extract_md5s': ('MD5 Hashes', '#️⃣'),
+    'extract_sha256s': ('SHA256 Hashes', '#️⃣'),
+    'extract_base64s': ('Base64 Strings', '🔤'),
+}
+
+def _try_extractions(text):
+    """Run extraction operations on plain text and return formatted results."""
+    results = []
+    for op_name, (label, emoji) in _EXTRACTION_OPS.items():
+        if op_name not in OPERATIONS:
+            continue
+        try:
+            extracted = execute_operation(op_name, text)
+            if extracted and extracted.strip():
+                items = [item for item in extracted.strip().split('\n') if item.strip()]
+                if op_name == 'extract_base64s':
+                    items = [item for item in items if _is_confident_base64_candidate(item)]
+                unique_items = list(dict.fromkeys(items))
+                if unique_items:
+                    display = f"{emoji} Extracted {label}: {len(unique_items)} unique item(s)\n"
+                    display += "-" * 40 + "\n"
+                    display += "\n".join(unique_items)
+                    results.append({
+                        "method": f"Extract {label}",
+                        "operation": op_name,
+                        "decoded": display,
+                        "score": 95,
+                        "confidence": 95,
+                        "layer": 1,
+                        "chain": f"Extract {label}",
+                        "length": len(display),
+                        "ai_validated": True
+                    })
+        except Exception:
+            continue
+    return results
+
+
+def _is_strict_base64_like(text):
+    if not text:
+        return False
+    t = text.strip()
+    if not re.fullmatch(r'[A-Za-z0-9+/=_-]+', t):
+        return False
+    return len(t) >= 8 and len(t) % 4 == 0
+
+
+def _is_strict_hex_like(text):
+    if not text:
+        return False
+    t = re.sub(r"\s+", "", text.strip())
+    return len(t) >= 8 and len(t) % 2 == 0 and re.fullmatch(r"[0-9a-fA-F]+", t) is not None
+
+
+def _looks_like_encoded_payload(text):
+    if not text:
+        return False
+    t = text.strip()
+    if _is_strict_base64_like(t) or _is_strict_hex_like(t):
+        return True
+    if re.fullmatch(r"[A-Z2-7=]+", t.upper()) and len(t) >= 8:
+        return True
+    if re.search(r"%[0-9A-Fa-f]{2}", t):
+        return True
+    return False
+
+
+def _is_confident_base64_candidate(text):
+    """Avoid treating plain alphabetic words as Base64 extraction hits."""
+    if not _is_strict_base64_like(text):
+        return False
+    t = text.strip()
+
+    # Very short matches from plaintext (e.g., URL fragments like "8000/api")
+    # are usually false positives.
+    if len(s) < 12:
+        return False
+    return '=' in t or bool(re.search(r'[0-9+/_-]', t))
+
+
+def _looks_like_classical_cipher_input(text):
+    """Heuristic for Caesar/ROT/Atbash style payloads (incl. CTF flag punctuation)."""
+    if not text:
+        return False
+    t = text.strip()
+    if len(t) < 6:
+        return False
+
+    # Allow common punctuation found in flags/sentences.
+    if not re.fullmatch(r"[A-Za-z0-9\s_{}\-.,:;!?']+", t):
+        return False
+
+    alpha = sum(1 for c in t if c.isalpha())
+    ratio = alpha / max(len(t), 1)
+    return ratio >= 0.5
+
+
+def _prioritize_results_for_encoded_input(text, results):
+    """Re-rank results to prefer deterministic decoders for obvious encoded payloads."""
+    if not results:
+        return results
+
+    deterministic = {"base64", "base32", "hex", "binary", "url", "jwt", "unicode", "morse"}
+    boosted = []
+
+    strict_b64 = _is_strict_base64_like(text)
+    strict_hex = _is_strict_hex_like(text)
+    classical_like = _looks_like_classical_cipher_input(text)
+    
+    # Don't boost classical ciphers if input is ALREADY readable English
+    input_score = score_text(text)
+    boost_classical = classical_like and input_score < 70
+    
+    for r in results:
+        rr = dict(r)
+        method = rr.get("method", "")
+        score = rr.get("score", 0)
+
+        if method in deterministic:
+            score += 25
+        if strict_b64 and method == "base64":
+            score += 40
+        if strict_b64 and method == "xor":
+            score -= 40
+        if strict_b64 and method == "reverse":
+            score -= 50
+
+        # For strict hex input, if direct hex decode still looks encoded,
+        # prefer downstream decoded plaintext results.
+        if strict_hex and method == "hex":
+            decoded_text = rr.get("decoded", "")
+            if _looks_like_encoded_payload(decoded_text):
+                score -= 35
+
+        if boost_classical and method in {"caesar", "rot13", "atbash"}:
+            score += 30
+        if boost_classical and method == "xor":
+            score -= 35
+        # Only demote reverse if it has a weak score (likely garbage).
+        # If reverse already produced high-confidence plaintext (score >= 75),
+        # don't demote it — it's probably the correct answer.
+        if boost_classical and method == "reverse" and score < 75:
+            score -= 25
+
+        rr["score"] = max(0, min(100, int(round(score))))
+        boosted.append(rr)
+
+    boosted.sort(key=lambda x: x.get("score", 0), reverse=True)
+    return boosted
+
+
 @app.post("/decode")
 async def decode(input_data: TextInput):
     """
@@ -240,18 +397,52 @@ async def decode(input_data: TextInput):
             # Pass deep analysis flag to engine (5 layers if deep, 2 if normal)
             results = run_cipherx(text, use_ai_filter=True, max_depth=5 if input_data.deep else 2) 
             
-            # If AI filtered EVERYTHING (because it's not English), we fall back 
-            # to non-filtered mode so the user can still see the raw decode!
+            # If AI filtered EVERYTHING, check if input is already readable text.
+            # If so, don't fall back to unfiltered mode (which returns XOR garbage).
             if not results:
-                # Use the same max_depth as the initial scan to find multi-layer gibberish/flags
-                results = run_cipherx(text, use_ai_filter=False, max_depth=5 if input_data.deep else 2)
-                
+                input_score = score_output(text) if not AI_SCORER else score_text(text)
+                if input_score < 35:
+                    # Input is likely encoded — fall back to unfiltered mode
+                    results = run_cipherx(text, use_ai_filter=False, max_depth=5 if input_data.deep else 2)
+
+            # Re-rank for obviously encoded inputs (e.g., strict base64)
+            results = _prioritize_results_for_encoded_input(text, results)
+            
+            # Always try extractions (emails, URLs, IPs, etc.)
+            extraction_results = _try_extractions(text)
+            
             if not results:
+                # No decode results at all — return extractions if any
+                if extraction_results:
+                    return {
+                        "success": True,
+                        "message": f"Found {len(extraction_results)} extraction result(s)",
+                        "results": extraction_results
+                    }
                 return {
                     "success": False,
                     "message": "No valid text found.",
                     "results": []
                 }
+            
+            # If input is readable plaintext, prefer extractions only over clearly
+            # weak decode results. Strong classical decodes like ROT13/Caesar/Atbash
+            # should still win when they produce high-confidence plaintext.
+            if extraction_results:
+                input_score = score_text(text) if AI_SCORER else score_output(text)
+                # Check if best decode is just a weak transform
+                best_method = results[0].get('method', '') if results else ''
+                best_score = results[0].get('score', 0) if results else 0
+                best_decoded = results[0].get('decoded', '') if results else ''
+                best_is_noop = best_decoded.strip() == text.strip()
+                weak_methods = {'reverse', 'xor'}
+                if input_score >= 35 and (best_method in weak_methods or best_score < 80 or best_is_noop):
+                    # Input is plaintext — extractions are more useful
+                    return {
+                        "success": True,
+                        "message": f"Found {len(extraction_results)} extraction result(s)",
+                        "results": extraction_results
+                    }
             
             # Format results for frontend
             formatted_results = []
@@ -339,6 +530,14 @@ async def decode(input_data: TextInput):
     results.sort(key=lambda x: x['confidence'], reverse=True)
     
     if not results:
+        # Try extraction operations before giving up
+        extraction_results = _try_extractions(text)
+        if extraction_results:
+            return {
+                "success": True,
+                "message": f"Found {len(extraction_results)} extraction result(s)",
+                "results": extraction_results
+            }
         return {
             "success": False,
             "message": "Could not decode text with any known method",
@@ -371,6 +570,15 @@ async def encode(input_data: EncodeInput):
     try:
         result = execute_operation(operation, text, **params)
         if result is None or (isinstance(result, str) and result.startswith("Error")):
+            # For extraction operations, None/empty means no matches — not an error
+            if operation.startswith('extract_'):
+                return {
+                    "success": True,
+                    "operation": operation,
+                    "input": text[:200] + "..." if len(text) > 200 else text,
+                    "output": "",
+                    "length": 0
+                }
             raise HTTPException(status_code=400, detail=f"Operation failed: {result}")
         
         return {
@@ -380,6 +588,8 @@ async def encode(input_data: EncodeInput):
             "output": result[:1000] + "..." if len(str(result)) > 1000 else result,
             "length": len(str(result))
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -512,7 +722,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         input_text = " ".join(sys.argv[1:])
         print("\n" + "="*60)
-        print("🔐 CipherX CLI - AI Decoder")
+        print("[*] CipherX CLI - AI Decoder")
         print("="*60)
         print(f"Input: {input_text}\n")
         
@@ -521,7 +731,7 @@ if __name__ == "__main__":
             results = run_cipherx(input_text, use_ai_filter=True)
             
             if not results:
-                print("❌ No valid English results found.")
+                print("[X] No valid English results found.")
             else:
                 print(f"Found {len(results)} potential result(s):\n")
                 for i, r in enumerate(results[:5]):
@@ -540,13 +750,13 @@ if __name__ == "__main__":
 
     # Server mode (No arguments)
     print("\n" + "="*60)
-    print("🚀 Starting CipherX AI Backend Server...")
+    print("[*] Starting CipherX AI Backend Server...")
     print("="*60)
     print("App URL: http://127.0.0.1:8000")
     
     def open_browser():
         time.sleep(1.5)  # Wait for server to initialize
-        print("🌍 Opening browser...")
+        print("[*] Opening browser...")
         webbrowser.open("http://127.0.0.1:8000")
 
     # Start browser in a separate thread

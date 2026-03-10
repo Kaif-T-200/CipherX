@@ -545,64 +545,79 @@ function toggleTheme() {
     }
 })();
 
-// Extraction operations
-function extractOperation(type) {
-    const text = document.getElementById("inputText").value;
+// Extraction operations (Improved to use backend and target outputText)
+async function extractOperation(type) {
+    const inputText = document.getElementById("inputText").value;
     const outputText = document.getElementById("outputText");
     const resultsDiv = document.getElementById("results");
 
-    if (!text.trim()) {
-        showNotification("Please enter some text first!");
+    // Always extract from input text — output may contain previous decode results
+    const textToProcess = inputText;
+
+    if (!textToProcess.trim()) {
+        showNotification("Please enter some text or generate output first!");
         return;
     }
 
-    const patterns = {
-        'emails': /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
-        'urls': /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g,
-        'ipv4': /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
-        'md5': /\b[a-fA-F0-9]{32}\b/g,
-        'sha256': /\b[a-fA-F0-9]{64}\b/g,
-        'base64': /\b[A-Za-z0-9+/]{8,}(?:={0,2})\b/g
+    const opMap = {
+        'emails': 'extract_emails',
+        'urls': 'extract_urls',
+        'ipv4': 'extract_ips',
+        'md5': 'extract_md5s',
+        'sha256': 'extract_sha256s',
+        'base64': 'extract_base64s'
     };
 
-    const pattern = patterns[type];
-    if (!pattern) return;
+    const op = opMap[type];
+    if (!op) return;
 
-    const matches = text.match(pattern);
+    showNotification(`Extracting ${type}...`);
 
-    if (!matches || matches.length === 0) {
-        showNotification(`No ${type} found.`);
-        outputText.value = `No ${type} found in input text.`;
+    try {
+        const response = await fetch(`${API_BASE}/encode`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: textToProcess, operation: op })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Extraction failed");
+
+        const resultText = data.output;
+        if (!resultText || resultText.trim() === "" || resultText === "None") {
+            showNotification(`No ${type} found.`);
+            resultsDiv.innerHTML = `
+                <div class="result-card low-score">
+                    <div><strong>⚠️ Extraction:</strong> ${type.toUpperCase()}</div>
+                    <div class="decoded-content">No matches found in ${textToProcess === inputText ? "Input" : "Output"}.</div>
+                </div>
+            `;
+            return;
+        }
+
+        const matches = resultText.split('\n');
+        const uniqueMatches = [...new Set(matches)];
+
+        // Update output field with formatted results
+        let finalDisplay = `🎯 Extraction Results: ${type.toUpperCase()}\n`;
+        finalDisplay += `📊 Found ${uniqueMatches.length} unique items\n`;
+        finalDisplay += `------------------------------------------------------------\n\n`;
+        finalDisplay += uniqueMatches.join('\n');
+
+        outputText.value = finalDisplay;
+        document.getElementById('outputStats').textContent = `Items: ${uniqueMatches.length}`;
+        showNotification(`Extracted ${uniqueMatches.length} ${type}!`);
+
         resultsDiv.innerHTML = `
-            <div class="result-card low-score">
-                <div><strong>⚠️ Extraction:</strong> ${type.toUpperCase()}</div>
-                <div class="decoded-content">No matches found.</div>
+            <div class="result-card high-score">
+                <div><strong>🎯 Extracted ${type.toUpperCase()}:</strong> ${uniqueMatches.length} Items</div>
+                <div class="decoded-content">${escapeHtml(uniqueMatches.join(', '))}</div>
             </div>
         `;
-        return;
+    } catch (error) {
+        console.error("Extraction error:", error);
+        showNotification("Error: " + error.message);
     }
-
-    // Remove duplicates
-    const uniqueMatches = [...new Set(matches)];
-
-    // Format output
-    let resultText = `🎯 Extraction Results: ${type.toUpperCase()}\n`;
-    resultText += `📊 Found ${uniqueMatches.length} unique items (from ${matches.length} total matches)\n`;
-    resultText += `------------------------------------------------------------\n\n`;
-    resultText += uniqueMatches.join('\n');
-
-    outputText.value = resultText;
-    document.getElementById('outputStats').textContent = `Length: ${resultText.length} | Items: ${uniqueMatches.length}`;
-
-    showNotification(`Extracted ${uniqueMatches.length} ${type}!`);
-
-    // Show in results panel
-    resultsDiv.innerHTML = `
-        <div class="result-card high-score">
-            <div><strong>🎯 Extracted ${type.toUpperCase()}:</strong> ${uniqueMatches.length} Items</div>
-            <div class="decoded-content">${escapeHtml(uniqueMatches.join(', '))}</div>
-        </div>
-    `;
 }
 
 // Tab Switching Logic
@@ -639,10 +654,62 @@ function switchTab(tabName) {
 }
 
 // Placeholder functions for Batch/Recipe/History
+// Favorites Functionality (Implemented using localStorage)
+function toggleFavorite(opName, isManual = true) {
+    let favorites = JSON.parse(localStorage.getItem('cipherx_favorites') || '[]');
+    const op = { name: opName, manual: isManual };
+
+    const index = favorites.findIndex(f => f.name === opName);
+    if (index === -1) {
+        favorites.push(op);
+        showNotification(`Added ${opName} to favorites!`);
+    } else {
+        favorites.splice(index, 1);
+        showNotification(`Removed ${opName} from favorites.`);
+    }
+
+    localStorage.setItem('cipherx_favorites', JSON.stringify(favorites));
+    loadFavorites();
+}
+
+function loadFavorites() {
+    const list = document.getElementById('favoritesList');
+    if (!list) return;
+
+    const favorites = JSON.parse(localStorage.getItem('cipherx_favorites') || '[]');
+    list.innerHTML = "";
+
+    if (favorites.length === 0) {
+        list.innerHTML = "<p style='opacity: 0.5; font-size: 0.8em; padding: 10px;'>No favorites yet. Add some!</p>";
+        return;
+    }
+
+    favorites.forEach(fav => {
+        const btn = document.createElement('button');
+        btn.className = 'op-btn';
+        btn.style.display = 'flex';
+        btn.style.justifyContent = 'space-between';
+        btn.style.alignItems = 'center';
+
+        const funcCall = fav.manual ? `manualOperation('${fav.name}')` : `encodeOperation('${fav.name}')`;
+        const label = fav.name.charAt(0).toUpperCase() + fav.name.slice(1);
+
+        btn.innerHTML = `
+            <span onclick="${funcCall}">${label}</span>
+            <span onclick="toggleFavorite('${fav.name}', ${fav.manual})" style="opacity: 0.5; cursor: pointer;">✕</span>
+        `;
+        list.appendChild(btn);
+    });
+}
+
 function clearFavorites() {
-    document.getElementById('favoritesList').innerHTML = "";
+    localStorage.removeItem('cipherx_favorites');
+    loadFavorites();
     showNotification("Favorites cleared!");
 }
+
+// Ensure favorites load on start
+document.addEventListener('DOMContentLoaded', loadFavorites);
 
 async function showHashAll() {
     const text = document.getElementById("inputText").value;

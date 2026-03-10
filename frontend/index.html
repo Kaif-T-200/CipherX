@@ -171,8 +171,13 @@
                         data-tooltip="Atbash: Mirrors the alphabet (A ↔ Z, B ↔ Y).">Atbash</button>
                     <button class="op-btn" onclick="manualOperation('vigenere')"
                         data-tooltip="Vigenère Cipher: Polyalphabetic substitution using a keyword.">Vigenère</button>
-                    <button class="op-btn" onclick="manualOperation('morse')"
-                        data-tooltip="Morse Code: Converts . and - notation to uppercase text.">Morse</button>
+                    <!-- Morse Code: Explicit Encode/Decode -->
+                    <div style="display: flex; gap: 5px; width: 100%;">
+                        <button class="op-btn" onclick="encodeOperation('morse')" style="flex: 1;"
+                            data-tooltip="Morse Encode: Converts text to . and - notation.">Morse Encode</button>
+                        <button class="op-btn" onclick="manualOperation('morse')" style="flex: 1;"
+                            data-tooltip="Morse Decode: Decodes . and - notation to text.">Morse Decode</button>
+                    </div>
                     <button class="op-btn" onclick="manualOperation('railfence')"
                         data-tooltip="Rail Fence: A transposition cipher that writes text in a zigzag pattern.">Rail
                         Fence</button>
@@ -261,18 +266,42 @@
                 <!-- 🔎 Regex & Extraction -->
                 <h3 class="category-header">🔎 Extraction</h3>
                 <div class="operations-list">
-                    <button class="op-btn" onclick="extractOperation('emails')"
-                        data-tooltip="Extract all email addresses from the input text.">Extract Emails</button>
-                    <button class="op-btn" onclick="extractOperation('urls')"
-                        data-tooltip="Extract all URLs and links from the input text.">Extract URLs</button>
-                    <button class="op-btn" onclick="extractOperation('ipv4')"
-                        data-tooltip="Extract all IPv4 addresses.">Extract IPs</button>
-                    <button class="op-btn" onclick="extractOperation('md5')"
-                        data-tooltip="Extract all MD5 hash-looking strings (32 hex chars).">Extract MD5s</button>
-                    <button class="op-btn" onclick="extractOperation('sha256')"
-                        data-tooltip="Extract all SHA-256 hash-looking strings (64 hex chars).">Extract SHA256s</button>
-                    <button class="op-btn" onclick="extractOperation('base64')"
-                        data-tooltip="Extract potential Base64 encoded strings.">Extract Base64</button>
+                    <div style="position: relative;">
+                        <button class="op-btn" onclick="extractOperation('emails')" style="width: 100%;"
+                            data-tooltip="Extract all email addresses from the input/output text.">Extract Emails</button>
+                        <span class="fav-icon" onclick="toggleFavorite('emails', false)" title="Add to Favorites" 
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.5;">⭐</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="op-btn" onclick="extractOperation('urls')" style="width: 100%;"
+                            data-tooltip="Extract all URLs and links from the input/output text.">Extract URLs</button>
+                        <span class="fav-icon" onclick="toggleFavorite('urls', false)" title="Add to Favorites" 
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.5;">⭐</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="op-btn" onclick="extractOperation('ipv4')" style="width: 100%;"
+                            data-tooltip="Extract all IPv4 addresses.">Extract IPs</button>
+                        <span class="fav-icon" onclick="toggleFavorite('ipv4', false)" title="Add to Favorites" 
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.5;">⭐</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="op-btn" onclick="extractOperation('md5')" style="width: 100%;"
+                            data-tooltip="Extract all MD5 hash-looking strings (32 hex chars).">Extract MD5s</button>
+                        <span class="fav-icon" onclick="toggleFavorite('md5', false)" title="Add to Favorites" 
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.5;">⭐</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="op-btn" onclick="extractOperation('sha256')" style="width: 100%;"
+                            data-tooltip="Extract all SHA-256 hash-looking strings (64 hex chars).">Extract SHA256s</button>
+                        <span class="fav-icon" onclick="toggleFavorite('sha256', false)" title="Add to Favorites" 
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.5;">⭐</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="op-btn" onclick="extractOperation('base64')" style="width: 100%;"
+                            data-tooltip="Extract potential Base64 encoded strings.">Extract Base64</button>
+                        <span class="fav-icon" onclick="toggleFavorite('base64', false)" title="Add to Favorites" 
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.5;">⭐</span>
+                    </div>
                 </div>
             </div>
 

@@ -142,7 +142,7 @@ def from_url(text):
 def to_url(text):
     """URL Encode"""
     try:
-        return quote(text)
+        return quote(text, safe='')
     except:
         return None
 
@@ -815,15 +815,40 @@ def remove_whitespace(text):
 
 def extract_urls(text):
     """Extract URLs from text"""
-    url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    url_pattern = r'https?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     urls = re.findall(url_pattern, text)
-    return '\n'.join(urls) if urls else None
+    return '\n'.join(urls) if urls else ""
 
 def extract_emails(text):
     """Extract Email Addresses"""
-    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
     emails = re.findall(email_pattern, text)
-    return '\n'.join(emails) if emails else None
+    return '\n'.join(emails) if emails else ""
+
+def extract_ips(text):
+    """Extract IPv4 Addresses"""
+    ip_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+    ips = re.findall(ip_pattern, text)
+    return '\n'.join(ips) if ips else ""
+
+def extract_md5s(text):
+    """Extract MD5 Hashes"""
+    md5_pattern = r'\b[a-fA-F0-9]{32}\b'
+    hashes = re.findall(md5_pattern, text)
+    return '\n'.join(hashes) if hashes else ""
+
+def extract_sha256s(text):
+    """Extract SHA256 Hashes"""
+    sha256_pattern = r'\b[a-fA-F0-9]{64}\b'
+    hashes = re.findall(sha256_pattern, text)
+    return '\n'.join(hashes) if hashes else ""
+
+def extract_base64s(text):
+    """Extract potential Base64 strings"""
+    # Look for strings that look like base64 (min 8 chars, 4-char alignment)
+    base64_pattern = r'\b[A-Za-z0-9+/]{8,}(?:={0,2})\b'
+    matches = re.findall(base64_pattern, text)
+    return '\n'.join(matches) if matches else ""
 
 # ============================================================================
 # OPERATION REGISTRY
@@ -913,6 +938,10 @@ OPERATIONS = {
     'remove_whitespace': remove_whitespace,
     'extract_urls': extract_urls,
     'extract_emails': extract_emails,
+    'extract_ips': extract_ips,
+    'extract_md5s': extract_md5s,
+    'extract_sha256s': extract_sha256s,
+    'extract_base64s': extract_base64s,
 }
 
 def execute_operation(operation_name, input_text, **kwargs):

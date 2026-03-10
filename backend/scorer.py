@@ -55,11 +55,11 @@ def trigram_score(text):
 def flag_bonus(text):
     """Bonus for flag patterns"""
     patterns = [
-        r'flag\{[^}]+\}',
-        r'ctf\{[^}]+\}',
-        r'FLAG\{[^}]+\}',
+        r'(?i)flag\{[^}]+\}',
+        r'(?i)ctf\{[^}]+\}',
         r'[A-Z0-9]{32}',  # MD5-like hash
-        r'picoCTF\{[^}]+\}'
+        r'(?i)picoctf\{[^}]+\}',
+        r'[A-Za-z]{3,10}\{[A-Za-z0-9_\-]+\}'
     ]
     for p in patterns:
         if re.search(p, text):

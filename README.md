@@ -20,6 +20,7 @@
 - [⚡ Quick Start](#-quick-start)
 - [⚙️ Tech Stack](#️-tech-stack)
 - [🛠️ Operations](#️-operations-reference)
+- [🆕 Recent Upgrades](#-recent-upgrades)
 - [📊 Test Report](#-final-validation-report)
 - [🆘 Support](#-troubleshooting)
 
@@ -70,7 +71,7 @@ CipherX Pro is engineered for speed and reliability using a specialized asynchro
 ## 🛠️ Operations Reference
 
 <details>
-<summary>📂 Click to view all 94 supported operations</summary>
+<summary>📂 Click to view all 68 supported operations</summary>
 
 ### 🔢 Encoding & Decoding
 - **Base Encodings:** Base64, Base32, Base58 (Bitcoin), Base85 (Ascii85)
@@ -93,8 +94,20 @@ CipherX Pro is engineered for speed and reliability using a specialized asynchro
 
 ---
 
+## 🆕 Recent Upgrades
+
+CipherX Pro v4.1.5 received major quality improvements focused on real-world CTF/demo inputs:
+
+- **Smarter extraction priority:** Auto-decode now prefers extraction outputs when decode results are weak/no-op for plaintext-heavy inputs.
+- **Base64 noise reduction:** Short/weak Base64-like fragments are filtered to avoid false positives.
+- **Reverse vs classical tuning:** Reverse-text challenges now rank correctly without being overshadowed by weak Caesar/Atbash candidates.
+- **Multi-layer ranking improvements:** For strict Hex inputs, intermediate encoded outputs are demoted so deeper plaintext results are surfaced.
+- **Demo pack updates:** `CipherX_Demo_Problems.txt` was corrected and validated for 44 classroom-ready challenges.
+
+---
+
 ## 📊 Final Validation Report
-**Target Success Rate:** 100% | **Actual Success Rate:** 100% (94/94 Features)
+**Target Success Rate:** 100% | **Actual Success Rate:** 100% (68/68 Registered Operations)
 
 <details open>
 <summary>📈 Functional Test Matrix</summary>

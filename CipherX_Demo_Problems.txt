@@ -1,0 +1,361 @@
+
+================================================================================
+     CIPHERX PRO v4.1.5 — COMPREHENSIVE DEMO PROBLEMS (44 CHALLENGES)
+     Copy & Paste each problem into CipherX and decode / process it!
+================================================================================
+
+
+================================================================================
+  SECTION 1: BASE64 ENCODING (4 Problems)
+================================================================================
+
+--- Problem 1: Simple Base64 ---
+SGVsbG8gV29ybGQhIFdlbGNvbWUgdG8gQ2lwaGVyWCBQcm8u
+
+Expected Output: Hello World! Welcome to CipherX Pro.
+
+--- Problem 2: Base64 — Secret Message ---
+VGhpcyBpcyBhIHNlY3JldCBtZXNzYWdlIGVuY29kZWQgaW4gQmFzZTY0IGZvcm1hdC4=
+
+Expected Output: This is a secret message encoded in Base64 format.
+
+--- Problem 3: Base64 — Cybersecurity Quote ---
+Q3liZXJzZWN1cml0eSBpcyBub3QgYSBwcm9kdWN0LCBidXQgYSBwcm9jZXNzLiAtIEJydWNlIFNjaG5laWVy
+
+Expected Output: Cybersecurity is not a product, but a process. - Bruce Schneier
+
+--- Problem 4: Base64 — Flag Challenge ---
+Q1RGe2Jhc2U2NF9kZWNvZGluZ19pc19lYXN5fQ==
+
+Expected Output: CTF{base64_decoding_is_easy}
+
+
+================================================================================
+  SECTION 2: HEXADECIMAL ENCODING (4 Problems)
+================================================================================
+
+--- Problem 5: Simple Hex ---
+48656c6c6f20576f726c6421
+
+Expected Output: Hello World!
+
+--- Problem 6: Hex — Password Reveal ---
+50617373776f72643a2041646d696e403132333435
+
+Expected Output: Password: Admin@12345
+
+--- Problem 7: Hex — Hidden Flag ---
+4354467b6865785f6465636f64696e675f6d61737465727d
+
+Expected Output: CTF{hex_decoding_master}
+
+--- Problem 8: Hex with Colon Separators ---
+43:69:70:68:65:72:58:20:50:72:6f:20:69:73:20:61:77:65:73:6f:6d:65:21
+
+Expected Output: CipherX Pro is awesome!
+
+
+================================================================================
+  SECTION 3: BINARY ENCODING (3 Problems)
+================================================================================
+
+--- Problem 9: Simple Binary ---
+01001000 01100101 01101100 01101100 01101111
+
+Expected Output: Hello
+
+--- Problem 10: Binary — Secret Word ---
+01010011 01100101 01100011 01110101 01110010 01101001 01110100 01111001
+
+Expected Output: Security
+
+--- Problem 11: Binary — Flag ---
+01000011 01010100 01000110 01111011 01100010 01101001 01101110 01100001 01110010 01111001 01011111 01100011 01101111 01100100 01100101 01111101
+
+Expected Output: CTF{binary_code}
+
+
+================================================================================
+  SECTION 4: MORSE CODE (3 Problems)
+================================================================================
+
+--- Problem 12: Simple Morse ---
+.... . .-.. .-.. --- / .-- --- .-. .-.. -..
+
+Expected Output: HELLO WORLD
+
+--- Problem 13: Morse — SOS Message ---
+... --- ... / .-- . / -. . . -.. / .... . .-.. .--.
+
+Expected Output: SOS WE NEED HELP
+
+--- Problem 14: Morse — Cybersecurity ---
+-.-. -.-- -... . .-. / ... . -.-. ..- .-. .. - -.--
+
+Expected Output: CYBER SECURITY
+
+
+================================================================================
+  SECTION 5: CAESAR CIPHER (4 Problems)
+================================================================================
+
+--- Problem 15: Caesar Shift 3 ---
+Khoor Zruog
+
+Expected Output (Shift 3): Hello World
+
+--- Problem 16: Caesar Shift 7 ---
+Jpwolye Pz Mbu
+
+Expected Output (Shift 7): Cipherx Is Fun  (Use Caesar Bruteforce)
+
+--- Problem 17: Caesar Shift 13 (ROT13) ---
+Guvf vf n frperg zrffntr rapbqrq va EBG13
+
+Expected Output: This is a secret message encoded in ROT13
+
+--- Problem 18: Caesar — Flag ---
+FWI{fdhvdu_flskhu_euxwhirufh}
+
+Expected Output (Shift 3): CTF{caesar_cipher_bruteforce}
+
+
+================================================================================
+  SECTION 6: ROT13 (2 Problems)
+================================================================================
+
+--- Problem 19: ROT13 — Simple ---
+Plorefrphevgl vf gur shgher
+
+Expected Output: Cybersecurity is the future
+
+--- Problem 20: ROT13 — Quote ---
+Gur bayl frpher flfgrz vf bar gung vf hacyhttrq
+
+Expected Output: The only secure system is one that is unplugged
+
+
+================================================================================
+  SECTION 7: ATBASH CIPHER (2 Problems)
+================================================================================
+
+--- Problem 21: Atbash — Simple ---
+Svool Dliow
+
+Expected Output: Hello World
+
+--- Problem 22: Atbash — Message ---
+Xrksvi crksvi
+
+Expected Output: Cipher xipher  (Use Atbash button)
+
+
+================================================================================
+  SECTION 8: URL ENCODING (3 Problems)
+================================================================================
+
+--- Problem 23: URL Encoded String ---
+Hello%20World%21%20Welcome%20to%20CipherX%20Pro%2E
+
+Expected Output: Hello World! Welcome to CipherX Pro.
+
+--- Problem 24: URL Encoded Query ---
+username%3Dadmin%26password%3Dsecret%40123%26role%3Droot
+
+Expected Output: username=admin&password=secret@123&role=root
+
+--- Problem 25: URL Encoded Path ---
+https%3A%2F%2Fexample.com%2Fsearch%3Fq%3Dcipherx%2Bpro%26lang%3Den
+
+Expected Output: https://example.com/search?q=cipherx+pro&lang=en
+
+
+================================================================================
+  SECTION 9: BASE32 ENCODING (2 Problems)
+================================================================================
+
+--- Problem 26: Base32 — Simple ---
+JBSWY3DPEBLW64TMMQ======
+
+Expected Output: Hello World!
+
+--- Problem 27: Base32 — Flag ---
+INUXA2DFOJMCAUDSN4QFE33DNNZSC===
+
+Expected Output: CipherX Pro Rocks!  (Use Base32 decode)
+
+
+================================================================================
+  SECTION 10: UNICODE ESCAPE (2 Problems)
+================================================================================
+
+--- Problem 28: Unicode Escape Sequence ---
+\u0048\u0065\u006c\u006c\u006f\u0020\u0057\u006f\u0072\u006c\u0064
+
+Expected Output: Hello World
+
+--- Problem 29: Unicode — Secret ---
+\u0053\u0065\u0063\u0072\u0065\u0074\u0020\u004d\u0065\u0073\u0073\u0061\u0067\u0065
+
+Expected Output: Secret Message
+
+
+================================================================================
+  SECTION 11: REVERSE STRING (2 Problems)
+================================================================================
+
+--- Problem 30: Reversed Text ---
+!dlroW olleH
+
+Expected Output: Hello World!
+
+--- Problem 31: Reversed Sentence ---
+.ytiruces rebyc fo dlrow eht ot emocleW
+
+Expected Output: Welcome to the world of cyber security.
+
+
+================================================================================
+  SECTION 12: JWT TOKEN DECODING (2 Problems)
+================================================================================
+
+--- Problem 32: JWT Token ---
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+Expected Output: Decoded JWT showing {"sub":"1234567890","name":"John Doe","iat":1516239022}
+
+--- Problem 33: JWT Token — Admin ---
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJhZG1pbiIsImV4cCI6MTcwMDAwMDAwMH0.abc123
+
+Expected Output: Decoded JWT showing {"user":"admin","role":"superadmin","exp":1700000000}
+
+
+================================================================================
+  SECTION 13: EMAIL EXTRACTION (2 Problems)
+================================================================================
+
+--- Problem 34: Extract Emails from Text ---
+Contact us at support@cipherx.com for help.
+For sales, email sales@cipherx.com or reach out to info@cipherx.com.
+Personal: kaif@gmail.com and shifa@pcu.edu.in
+
+Expected Output: 5 unique emails extracted (support@cipherx.com, sales@cipherx.com, info@cipherx.com, kaif@gmail.com, shifa@pcu.edu.in)
+
+--- Problem 35: Emails Hidden in Noise ---
+###admin@server.com***test123***user@example.org!!!
+contact.us@company.co.in @@@ random@@noise hello@world.net
+
+Expected Output: 4 emails extracted (admin@server.com, user@example.org, contact.us@company.co.in, hello@world.net)
+
+
+================================================================================
+  SECTION 14: URL EXTRACTION (1 Problem)
+================================================================================
+
+--- Problem 36: Extract URLs from Text ---
+Visit our website at https://www.cipherx.com for more info.
+Documentation: https://docs.cipherx.com/api/v2
+Bug reports: https://github.com/cipherx/issues
+Also check http://localhost:8000/api for local API.
+
+Expected Output: 4 URLs extracted
+
+
+================================================================================
+  SECTION 15: IP ADDRESS EXTRACTION (1 Problem)
+================================================================================
+
+--- Problem 37: Extract IP Addresses ---
+Server 1: 192.168.1.100 (Web Server)
+Server 2: 10.0.0.55 (Database)
+Firewall: 172.16.0.1
+Public IP: 203.0.113.42
+DNS: 8.8.8.8 and 1.1.1.1
+
+Expected Output: 6 IP addresses extracted
+
+
+================================================================================
+  SECTION 16: HASH EXTRACTION (1 Problem)
+================================================================================
+
+--- Problem 38: Extract MD5 Hashes from Log ---
+File integrity check results:
+config.txt   - 5d41402abc4b2a76b9719d911017c592 - OK
+passwd.db    - 098f6bcd4621d373cade4e832627b4f6 - MODIFIED
+secret.key   - e99a18c428cb38d5f260853678922e03 - OK
+
+Expected Output: 3 MD5 hashes extracted
+
+
+================================================================================
+  SECTION 17: MULTI-LAYER / DOUBLE ENCODING (3 Problems)
+================================================================================
+
+--- Problem 39: Double Base64 ---
+U0dWc2JHOGdWMjl5YkdRaA==
+
+Expected Output (Layer 1): SGVsbG8gV29ybGQh
+Expected Output (Layer 2): Hello World!
+
+--- Problem 40: Hex encoded Base64 ---
+53475673624738675632397962475168
+
+Expected Output (Layer 1): SGVsbG8gV29ybGQh
+Expected Output (Layer 2): Hello World!
+
+--- Problem 41: Base64 of URL Encoding ---
+SGVsbG8lMjBXb3JsZCUyMQ==
+
+Expected Output (Layer 1): Hello%20World%21
+Expected Output (Layer 2): Hello World!
+
+
+================================================================================
+  SECTION 18: MIXED CHALLENGES — CTF STYLE (3 Problems)
+================================================================================
+
+--- Problem 42: CTF Challenge — Multi-step ---
+494e5558413244464f4a4d4636513255495a50564f324c4f4e5a5358453d3d3d
+
+Hint: Hex -> Base32 -> Plaintext
+Expected Output: CipherX_CTF_Winner
+
+--- Problem 43: ROT13 + Base64 ---
+First decode ROT13, then Base64:
+UUhSbGNtRllJRkJ5YnlCMk5DNHhMalU=
+
+Expected Output (Base64 first): CipherX Pro v4.1.5  (Use Base64 button)
+
+--- Problem 44: The Ultimate Challenge ---
+Decode this step by step:
+01010011 01000111 01010110 01110011 01100010 01000111 00111000 01100111 01010110 00110010 00111001 01111001 01100010 01000111 01010001 01101000
+
+Hint: Binary -> Base64 -> Plaintext
+Expected Output (Layer 1): SGVsbG8gV29ybGQh
+Expected Output (Layer 2): Hello World!
+
+
+================================================================================
+  HOW TO USE THIS FILE
+================================================================================
+
+  1. Open CipherX Pro in your browser (http://127.0.0.1:8000)
+  2. Copy any problem's encoded text (the line BELOW the --- Problem X --- header)
+  3. Paste it into the INPUT field of CipherX
+  4. Click "Auto Decode" for automatic detection
+     OR use the specific operation button (Base64, Hex, Caesar, etc.)
+  5. Compare the output with the Expected Output listed here
+
+  FEATURES TO DEMONSTRATE:
+  - Auto Decode (AI-powered automatic detection)
+  - Manual decode buttons (Base64, Hex, Caesar, etc.)
+  - Extract Emails / URLs / IPs / Hashes buttons
+  - Multi-layer decoding (Auto Decode handles nested encoding!)
+  - Caesar Bruteforce (shows all 25 shifts)
+  - JWT Token decoding
+  - Morse Code encode/decode
+
+================================================================================
+  END OF DEMO PROBLEMS — TOTAL: 44 CHALLENGES
+================================================================================

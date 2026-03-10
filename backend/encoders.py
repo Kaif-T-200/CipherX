@@ -88,17 +88,26 @@ def encode_morse(text):
         'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---',
         'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
         'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--',
-        'Z': '--..', ' ': '/',
+        'Z': '--..', 
         '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-',
-        '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.'
+        '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+        '.': '.-.-.-', ',': '--..--', '?': '..--..', "'": '.----.', '!': '-.-.--',
+        '/': '-..-.', '(': '-.--.', ')': '-.--.-', '&': '.-...', ':': '---...',
+        ';': '-.-.-.', '=': '-...-', '+': '.-.-.', '-': '-....-', '_': '..--.-',
+        '"': '.-..-.', '$': '...-..-', '@': '.--.-.'
     }
     
-    result = []
-    for char in text.upper():
-        if char in MORSE_CODE:
-            result.append(MORSE_CODE[char])
+    words = text.upper().split(' ')
+    morse_words = []
+    for word in words:
+        morse_chars = []
+        for char in word:
+            if char in MORSE_CODE:
+                morse_chars.append(MORSE_CODE[char])
+        if morse_chars:
+            morse_words.append(' '.join(morse_chars))
     
-    return ' '.join(result)
+    return ' / '.join(morse_words)
 
 def encode_unicode_escape(text):
     """Unicode Escape Encode"""

@@ -37,7 +37,7 @@ def _is_likely_classical_cipher_text(text):
         return False
 
     # Allow regular punctuation used in sentences; reject heavy symbol noise.
-    allowed_pattern = r"[A-Za-z0-9\s,.;:!?\-_'\"()\[\]/]+"
+    allowed_pattern = r"[A-Za-z0-9\s,.;:!?\-_'\"()\[\]/{}]+"
     if not re.fullmatch(allowed_pattern, text):
         return False
 

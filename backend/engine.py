@@ -52,6 +52,48 @@ def _looks_like_encoding(text):
     
     return False
 
+def _is_strict_base64_like(text):
+    """Strict check for full-string base64/base64url payloads."""
+    if not text:
+        return False
+    t = text.strip()
+    # Allow URL-safe variants and optional padding.
+    if not re.fullmatch(r'[A-Za-z0-9+/=_-]+', t):
+        return False
+    # Typical base64 payload lengths are multiples of 4.
+    return len(t) >= 8 and len(t) % 4 == 0
+
+
+def _is_flag_like(text):
+    if not text:
+        return False
+    return bool(re.match(r'^[A-Za-z]{3,10}\{[A-Za-z0-9_\-]+\}$', text.strip()))
+
+
+def _dedupe_results(results):
+    """Keep the best and simplest version of duplicate decoded outputs."""
+    best_by_key = {}
+    for result in results:
+        key = (result.get("method"), result.get("decoded"))
+        existing = best_by_key.get(key)
+        if existing is None:
+            best_by_key[key] = result
+            continue
+
+        existing_score = existing.get("score", 0)
+        current_score = result.get("score", 0)
+        existing_layer = existing.get("layer", 999)
+        current_layer = result.get("layer", 999)
+
+        if current_score > existing_score:
+            best_by_key[key] = result
+        elif current_score == existing_score and current_layer < existing_layer:
+            best_by_key[key] = result
+
+    deduped = list(best_by_key.values())
+    deduped.sort(key=lambda x: (-x.get("score", 0), x.get("layer", 999), len(x.get("chain", ""))))
+    return deduped
+
 def run_cipherx(text, depth=0, path="", use_ai_filter=True, max_depth=None):
     """
     AI-powered recursive decoder with intelligent validation
@@ -141,10 +183,26 @@ def run_cipherx(text, depth=0, path="", use_ai_filter=True, max_depth=None):
             # CRITICAL: Boost classical ciphers with strong English scores
             if method in {"caesar", "rot13", "atbash"} and s >= 80:
                 s = min(100, s + 10)  # Strong boost for perfect English in shift ciphers
+
+            # Flag-aware ranking for Caesar/ROT/Atbash results.
+            # Prefer standard CTF-like prefixes when ciphertext looks like a flag token.
+            if method in {"caesar", "rot13", "atbash"} and _is_flag_like(decoded):
+                upper_decoded = decoded.upper()
+                if upper_decoded.startswith("CTF{") or upper_decoded.startswith("FLAG{"):
+                    s = min(100, s + 20)
+                else:
+                    s = max(0, s - 10)
             
             # Demote reverse if it doesn't have very strong English
             if method == "reverse" and s < 75:
                 s = max(0, s - 15)  # Penalty for weak reverse results
+
+            # If input itself looks like strict base64 and reversing it still produces base64, skip.
+            # Use _is_strict_base64_like only (not _looks_like_encoding which is too broad and
+            # would falsely match plain English like "Hello World!").
+            if method == "reverse":
+                if _is_strict_base64_like(text) and _is_strict_base64_like(decoded):
+                    continue
 
             if method == "xor":
                 # XOR brute-force often generates printable garbage; demand stronger text quality.
@@ -174,10 +232,14 @@ def run_cipherx(text, depth=0, path="", use_ai_filter=True, max_depth=None):
             should_recurse = False
             if depth < max_depth:  # Use the passed-in max_depth
                 # Always recurse for common layered encodings
-                if method in ["base64", "hex", "base32", "url", "rot13", "caesar", "morse"]:
+                if method in ["base64", "hex", "base32", "url", "morse"]:
                     # Check if decoded text matches encoding patterns or looks suspicious
                     if _looks_like_encoding(decoded) or depth < 2:
                         should_recurse = True
+
+                # For classical ciphers, recurse only when output still looks encoded.
+                if method in ["rot13", "caesar"] and _looks_like_encoding(decoded):
+                    should_recurse = True
             
             if should_recurse and len(decoded) > 2 and len(decoded) < 15000:
                 try:
@@ -187,7 +249,7 @@ def run_cipherx(text, depth=0, path="", use_ai_filter=True, max_depth=None):
                     pass
 
     # Sort by score (AI confidence) - highest first
-    results = sorted(results, key=lambda x: x["score"], reverse=True)
+    results = _dedupe_results(results)
     
     # Return top 20 results to show more possibilities
     # All are now AI-validated to be real English!
